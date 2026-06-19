@@ -1,0 +1,29 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Define your database models, relations, and constraints in this file.
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String?
+  password      String
+  createdAt     DateTime       @default(now())
+  role          Role           @default(USER)
+}
+
+
+enum Role {
+  USER
+  ADMIN
+}
