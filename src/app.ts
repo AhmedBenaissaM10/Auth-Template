@@ -8,7 +8,10 @@ import AppError from './errors/AppError';
 import logger from './utils/logger';
 import { env } from './config/env';
 import { prisma } from './lib/prisma';
-
+import {RedisStore} from 'connect-redis'
+import redisClient from './lib/redis'
+import session from 'express-session'
+import authRouter from './features/auth/authRoute';
 
 
 const app = express()
@@ -17,7 +20,16 @@ app.use(helmet())
 app.use(cors())
 app.use(cookieParser())
 app.use(express.json())
-
+app.use(session({
+  store: new RedisStore({ client: redisClient}), 
+  secret: env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie:{
+    httpOnly: true,
+    secure: env.NODE_ENV === 'production'
+  }
+}))
 if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else {
@@ -28,9 +40,8 @@ if (env.NODE_ENV === 'development') {
   );
 }
 
-app.use('/',(_req, res) => {
-  res.send('Hello World!')
-})
+app.use('/auth', authRouter)
+
 
 app.use((_req: express.Request,_res: express.Response, next: express.NextFunction)=> next(new AppError("Error 404 - Page Not Found",404)))
 app.use(errorHandler)
