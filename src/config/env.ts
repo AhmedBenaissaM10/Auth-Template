@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
+import logger from '../utils/logger';
 dotenv.config();
 
 const EnvSchema = z.object({
@@ -11,9 +12,9 @@ const EnvSchema = z.object({
 const result = EnvSchema.safeParse(process.env);
 
 if (!result.success) {
-  console.error("Environment variable validation failed:", result.error.format());
+  logger.error("Environment variable validation failed:", result.error.format());
   process.exit(1);
 }
-console.log("✅ Environment variables validated.");
+logger.info("✅ Environment variables validated.");
 
 export const env = result.data;
