@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import bcrypt from 'bcryptjs';
-import {notFound, badRequest} from '../../errors/ErrorIndex';
+import {badRequest} from '../../errors/ErrorIndex';
 import catchAsync from '../../utils/catchAsync';
 import { CreateUser, loginUser, getUserProfile } from './authServices';
 import logger from '../../utils/logger';

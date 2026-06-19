@@ -12,6 +12,7 @@ import {RedisStore} from 'connect-redis'
 import redisClient from './lib/redis'
 import session from 'express-session'
 import authRouter from './features/auth/authRoute';
+import adminRouter from './features/admin/adminRoute';
 
 
 const app = express()
@@ -41,6 +42,7 @@ if (env.NODE_ENV === 'development') {
 }
 
 app.use('/auth', authRouter)
+app.use('/admin', adminRouter)
 
 
 app.use((_req: express.Request,_res: express.Response, next: express.NextFunction)=> next(new AppError("Error 404 - Page Not Found",404)))
