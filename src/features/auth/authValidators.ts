@@ -19,7 +19,7 @@ export const signupSchema = z.object({
 })
 
 export const loginSchema = z.object({
-    email: z.string().email("Please enter a valid email").trim(),
+    email: z.email("Please enter a valid email").trim().toLowerCase(),
     password: z.string().min(1, "password is required"),
     rememberMe: z.boolean().optional().default(false)
     

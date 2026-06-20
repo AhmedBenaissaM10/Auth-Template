@@ -11,3 +11,7 @@ export const badRequest = (message: string = "Bad Request") => new AppError( mes
 export const conflict = (message: string = "Conflict") => new AppError( message, 409);
 
 export const internalServerError = (message: string = "Internal Server Error") => new AppError( message, 500);
+
+export const handleJWTError = () =>  new AppError('Invalid token. Please log in again.', 401);
+
+export const handleJWTExpiredError = () =>  new AppError('Your token has expired. Please log in again.', 401);

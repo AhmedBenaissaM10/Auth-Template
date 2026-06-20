@@ -8,9 +8,7 @@ import AppError from './errors/AppError';
 import logger from './utils/logger';
 import { env } from './config/env';
 import { prisma } from './lib/prisma';
-import {RedisStore} from 'connect-redis'
-import redisClient from './lib/redis'
-import session from 'express-session'
+
 import authRouter from './features/auth/authRoute';
 import adminRouter from './features/admin/adminRoute';
 import { globalRateLimiter } from './middlewares/rateLimiter';
@@ -22,16 +20,7 @@ app.use(helmet())
 app.use(cors())
 app.use(cookieParser())
 app.use(express.json())
-app.use(session({
-  store: new RedisStore({ client: redisClient}), 
-  secret: env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie:{
-    httpOnly: true,
-    secure: env.NODE_ENV === 'production'
-  }
-}))
+
 app.use(globalRateLimiter)
 if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));

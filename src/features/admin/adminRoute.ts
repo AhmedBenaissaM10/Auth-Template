@@ -1,13 +1,13 @@
 import {Router} from 'express';
 import {getUsers, getUser, deleteUser, updateUser, addUser} from './adminControllers'
 import  { validate, validateId } from '../../middlewares/validate';
-import  { requireSession, authorize } from '../../middlewares/auth';
+import  { requireAuth, authorize } from '../../middlewares/auth';
 import { addUserSchema, updateUserSchema } from './adminValidators';
 
 
 const router = Router();
 
-router.use(requireSession);
+router.use(requireAuth);
 
 router.use(authorize('ADMIN'));
 

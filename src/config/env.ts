@@ -7,7 +7,7 @@ const EnvSchema = z.object({
   PORT: z.coerce.number().default(4000),
   DATABASE_URL: z.string(),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  SESSION_SECRET: z.string().min(15).default("your-session-secret"),
+  JWT_SECRET: z.string().min(15).default("your-JWT-secret"),
 });
 
 const result = EnvSchema.safeParse(process.env);

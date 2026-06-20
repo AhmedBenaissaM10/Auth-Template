@@ -1,7 +1,7 @@
 import {Router} from 'express';
 import {signup, login, logout, getProfile} from './authControllers'
 import  { validate } from '../../middlewares/validate';
-import  { requireSession } from '../../middlewares/auth';
+import  { requireAuth } from '../../middlewares/auth';
 import { signupSchema, loginSchema } from './authValidators';
 import { authRateLimiter } from '../../middlewares/rateLimiter';
 
@@ -14,7 +14,7 @@ router.post("/signup", authRateLimiter, validate(signupSchema), signup)
 
 router.post("/logout",logout)
 
-router.get("/profile",requireSession, getProfile)
+router.get("/profile",requireAuth, getProfile)
 
 
 

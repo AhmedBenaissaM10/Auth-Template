@@ -22,7 +22,7 @@ export const getUser = catchAsync(async (req: Request, res: Response, next: Next
     res.status(200).json({ success: true, user });
 });
 
-// POST /admin/create-user
+// POST /users
 export const addUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { name, email, password , role} = req.body;
     const user = await createUser(name, email, password, role);

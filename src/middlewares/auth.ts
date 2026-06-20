@@ -1,30 +1,22 @@
 import type { Request, Response, NextFunction } from 'express';
 import {unauthorized, forbidden} from '../errors/ErrorIndex';
+import { decodeToken } from '../utils/jwtUtils';
 
 
-declare module "express-session" {
-  interface SessionData {
-    user? :{
-        id: string;
-        email : string;
-        role: "USER" | "ADMIN"
-    }
-  }
-}
-
-export const requireSession = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.session.user?.id) {
-    return next(unauthorized());
-  }
+export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+  const jwtToken: string | undefined = req.cookies.jwt || req.headers.authorization?.split(' ')[1];
+  if(!jwtToken) return next(unauthorized("No token provided"));
+  const decoded = decodeToken(jwtToken);
+  req.user = decoded;
   next();
 }
 
 export const authorize = (...roles: string[]) => {
   return (req: Request, _res: Response, next: NextFunction) => {
-    if (!req.session.user) {
+    if (!req.user) {
       return next(unauthorized());
     }
-    if (!roles.includes(req.session.user.role)) {
+    if (!roles.includes(req.user.role)) {
       return next(forbidden("Access denied"));
     }
     next();

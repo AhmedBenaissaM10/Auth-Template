@@ -2,6 +2,7 @@
 import bcrypt from 'bcryptjs';
 import {notFound, badRequest} from '../../errors/ErrorIndex';
 import { prisma } from '../../lib/prisma';
+import logger from '../../utils/logger';
 
 
 
@@ -14,9 +15,12 @@ export const CreateUser = async(email: string, name: string, password: string) =
 
 export const loginUser = async ( email : string , password: string ) => {
     const user = await prisma.user.findUnique({where:{email}})
+    logger.debug(`Attempting login for email: ${email}`);
+    logger.debug(`User found: ${user ? user.id : 'No user found'}`);
     if (!user) throw badRequest("Invalid credentials");
-
+    logger.debug(`Found user: ${user.id}`);
     const isMatch = await bcrypt.compare(password, user.password);
+    logger.debug(`Password comparison for user ${email}: ${isMatch}`);
     if (!isMatch) throw badRequest("Invalid credentials");
     return user
 }
