@@ -5,7 +5,6 @@ import { CreateUser, loginUser, getUserProfile } from './authServices';
 import logger from '../../utils/logger';
 
 
-
 // POST /signup
 export const signup = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { name, email, password } = req.body || {};

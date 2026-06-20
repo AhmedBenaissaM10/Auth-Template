@@ -13,10 +13,11 @@ import redisClient from './lib/redis'
 import session from 'express-session'
 import authRouter from './features/auth/authRoute';
 import adminRouter from './features/admin/adminRoute';
+import { globalRateLimiter } from './middlewares/rateLimiter';
 
 
 const app = express()
-
+app.set('trust proxy', 1);
 app.use(helmet())
 app.use(cors())
 app.use(cookieParser())
@@ -31,6 +32,7 @@ app.use(session({
     secure: env.NODE_ENV === 'production'
   }
 }))
+app.use(globalRateLimiter)
 if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else {
