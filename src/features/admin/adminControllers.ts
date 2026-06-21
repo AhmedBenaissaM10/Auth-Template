@@ -13,7 +13,7 @@ export const getUsers = catchAsync(async (req: Request, res: Response, next: Nex
     res.status(200).json({ success: true, users });
 });
 
-// GET /user/:id
+// GET /users/:id
 export const getUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id as string;
 
@@ -30,7 +30,7 @@ export const addUser = catchAsync(async (req: Request, res: Response, next: Next
     res.status(201).json({ success: true, user });
 }
 )
-// DELETE /user/:id
+// DELETE /users/:id
 export const deleteUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const id  = req.params.id as string;
     const user = await deleteUserService(id);
@@ -39,7 +39,7 @@ export const deleteUser = catchAsync(async (req: Request, res: Response, next: N
 })
 
 
-// PATCH /user/:id
+// PATCH /users/:id
 export const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id as string;
     const { name, email, role, password } = req.body || {};
