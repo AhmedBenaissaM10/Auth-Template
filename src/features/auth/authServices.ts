@@ -49,5 +49,7 @@ export const refreshService = async (refreshToken: string) => {
     const storedToken = await redisClient.get(`refresh:${refreshDecoded.id}`);
     if(!storedToken || storedToken !== refreshToken) throw unauthorized("Refresh token not found")
     const accessToken = createAccessToken(refreshDecoded.id, refreshDecoded.email, refreshDecoded.role);
+    const newRefreshToken = createRefreshToken(refreshDecoded.id, refreshDecoded.email, refreshDecoded.role);
+    await redisClient.set(`refresh:${refreshDecoded.id}`, newRefreshToken, {EX: 7 * 24 * 60 * 60});
     return { email: refreshDecoded.email, accessToken };
 }
