@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import catchAsync from '../../utils/catchAsync';
-import { CreateUser, loginUser, getUserProfile, logoutService, refreshService } from './authServices';
+import { CreateUser, loginUser, getUserProfile, logoutService, refreshService, verifyEmailService, sendOTP, resendOTPService } from './authServices';
 import logger from '../../utils/logger';
 import { setAuthCookies, clearAuthCookies } from '../../utils/cookie';
 import { badRequest, unauthorized } from '../../errors/ErrorIndex';
@@ -10,12 +10,10 @@ import { badRequest, unauthorized } from '../../errors/ErrorIndex';
 export const signup = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { name, email, password } = req.body || {};
 
-    const { user, accessToken, refreshToken } = await CreateUser(email, name, password)
+    const user  = await CreateUser(email, name, password)
 
-    setAuthCookies(res, accessToken, refreshToken);
-
-    logger.info(`User ${user.email} signed up`, { userId: user.id });
-    res.status(201).json({ success: true, user });
+    logger.info(`User ${user.email} created, waiting for email verification`, { userId: user.id });
+    res.status(201).json({ success: true, message: 'User created, please verify your email' });
 }
 )
 
@@ -23,7 +21,7 @@ export const signup = catchAsync(async (req: Request, res: Response, next: NextF
 export const login = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { email, password, rememberMe } = req.body || {};
 
-    const { user, accessToken, refreshToken } = await loginUser(email, password, rememberMe)
+    const { user, accessToken, refreshToken } = await loginUser(email, password)
 
     setAuthCookies(res, accessToken, refreshToken, rememberMe);
     logger.info(`User ${user.email} logged in`, { userId: user.id });
@@ -62,4 +60,20 @@ export const refresh = catchAsync( async (req: Request, res: Response, next: Nex
     setAuthCookies(res, accessToken);
     logger.info(`${email} created a new access token`)
     res.status(200).json({success: true, message: "Access Token created"})
+})
+
+// POST /verfiry-email
+export const verifyEmail = catchAsync( async (req: Request, res: Response, next: NextFunction) => {
+    const { email, code } = req.body || {};
+    const { user, accessToken, refreshToken } = await verifyEmailService(email, code);
+    setAuthCookies(res, accessToken, refreshToken);
+    logger.info(`User ${email} verified their email`)
+    res.status(200).json({success: true, message: "Email verified successfully", user: {id: user.id, email: user.email, name: user.name}})
+})
+
+export const resendOTP = catchAsync( async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body || {};
+    await resendOTPService(email);
+    logger.info(`User ${email} requested a new OTP`)
+    res.status(200).json({success: true, message: "OTP sent to your email"})
 })

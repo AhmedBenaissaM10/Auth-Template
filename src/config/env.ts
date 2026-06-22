@@ -9,6 +9,7 @@ const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   ACCESS_TOKEN_SECRET: z.string().min(15).default("your-Access-Token-secret"),
   REFRESH_TOKEN_SECRET: z.string().min(15).default("your-Refresh-Token-secret"),
+  RESEND_API_KEY: z.string(),
 });
 
 const result = EnvSchema.safeParse(process.env);

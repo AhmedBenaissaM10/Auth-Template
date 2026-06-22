@@ -14,14 +14,14 @@ datasource db {
 
 // Define your database models, relations, and constraints in this file.
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  name          String?
-  password      String
-  createdAt     DateTime       @default(now())
-  role          Role           @default(USER)
+  id         String   @id @default(uuid())
+  email      String   @unique
+  name       String?
+  password   String
+  createdAt  DateTime @default(now())
+  role       Role     @default(USER)
+  isVerified Boolean  @default(false)
 }
-
 
 enum Role {
   USER
