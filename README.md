@@ -146,7 +146,7 @@ Commits:
 
 Token strategy:
 - **Access token** — 15 min, stateless, verified by signature
-- **Refresh token** — 7 days (30 days with `rememberMe`), stored in Redis, single-use
+- **Refresh token** — 7 days, stored in Redis, single-use
 
 ---
 

@@ -16,10 +16,10 @@ declare global {
 }
 
 
-export const createRefreshToken = (id: string,email: string, role: string, rememberMe: boolean = false): string => {
+export const createRefreshToken = (id: string,email: string, role: string): string => {
     
     return jwt.sign({ id, email, role }, env.REFRESH_TOKEN_SECRET, {
-        expiresIn: rememberMe ? "28d" : "7d"
+        expiresIn: "7d"
     });
 };
 export const createAccessToken = (id: string, email: string, role: string): string => {

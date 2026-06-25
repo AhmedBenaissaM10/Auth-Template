@@ -21,9 +21,9 @@ export const delCookie = (res: Response, name: string) => {
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 const SEVEN_DAYS = 60 * 60 * 1000 * 24 * 7;
 
-export const setAuthCookies = (res: Response, accessToken: string, refreshToken?: string, rememberMe: boolean = false) => {
+export const setAuthCookies = (res: Response, accessToken: string, refreshToken?: string) => {
   setCookie(res, "accessToken", accessToken, FIFTEEN_MINUTES);
-  if (refreshToken) setCookie(res, "refreshToken", refreshToken, rememberMe ? SEVEN_DAYS * 4 : SEVEN_DAYS);
+  if (refreshToken) setCookie(res, "refreshToken", refreshToken,  SEVEN_DAYS );
 };
 export const clearAuthCookies = (res: Response)=>{
   delCookie(res, "accessToken")

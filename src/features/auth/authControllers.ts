@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import catchAsync from '../../utils/catchAsync';
-import { CreateUser, loginUser, getUserProfile, logoutService, refreshService, verifyEmailService, sendOTP, resendOTPService, resetPasswordService, forgotPasswordService } from './authServices';
+import { CreateUser, loginUser, getUserProfile, logoutService, refreshService, verifyEmailService, sendOTP, resendOTPService, resetPasswordService, forgotPasswordService, changePasswordService } from './authServices';
 import logger from '../../utils/logger';
 import { setAuthCookies, clearAuthCookies } from '../../utils/cookie';
 import { unauthorized } from '../../errors/ErrorIndex';
@@ -8,7 +8,7 @@ import { sendSuccess } from '../../utils/response';
 
 
 // POST /signup
-export const signup = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const signup = catchAsync(async (req: Request, res: Response) => {
     const { name, email, password } = req.body || {};
 
     const user  = await CreateUser(email, name, password)
@@ -19,7 +19,7 @@ export const signup = catchAsync(async (req: Request, res: Response, next: NextF
 )
 
 // POST /login
-export const login = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const login = catchAsync(async (req: Request, res: Response) => {
     const { email, password } = req.body || {};
 
     const { user, accessToken, refreshToken } = await loginUser(email, password)
@@ -31,20 +31,18 @@ export const login = catchAsync(async (req: Request, res: Response, next: NextFu
 );
 
 // POST /logout
-export const logout = async(req: Request, res: Response, next: NextFunction) => {
-    const refreshToken: string | undefined = req.cookies.refreshToken;
-    
-    if(refreshToken){
-        const {id, email} = await logoutService(refreshToken)
-
-        logger.info(`User ${email} logged out`, { id });
-    } 
-    clearAuthCookies(res);
-    sendSuccess(res,200, null,'User logged out');
-};
+export const logout = catchAsync(async (req: Request, res: Response) => {
+  const refreshToken: string | undefined = req.cookies.refreshToken
+  if (refreshToken) {
+    const { id, email } = await logoutService(refreshToken)
+    logger.info(`User ${email} logged out`, { id })
+  }
+  clearAuthCookies(res)
+  sendSuccess(res, 200, null, 'User logged out')
+})
 
 // GET /profile
-export const getProfile = catchAsync( async (req: Request, res: Response, next: NextFunction) => {
+export const getProfile = catchAsync( async (req: Request, res: Response) => {
     
     const user = await getUserProfile(req.user!.id)
     
@@ -64,7 +62,7 @@ export const refresh = catchAsync( async (req: Request, res: Response, next: Nex
 })
 
 // POST /verfiry-email
-export const verifyEmail = catchAsync( async (req: Request, res: Response, next: NextFunction) => {
+export const verifyEmail = catchAsync( async (req: Request, res: Response) => {
     const { email, code } = req.body || {};
     const { user, accessToken, refreshToken } = await verifyEmailService(email, code);
     setAuthCookies(res, accessToken, refreshToken);
@@ -72,23 +70,31 @@ export const verifyEmail = catchAsync( async (req: Request, res: Response, next:
     sendSuccess(res,200, {id: user.id, email: user.email, name: user.name}, "Email verified successfully")
 })
 
-export const resendOTP = catchAsync( async (req: Request, res: Response, next: NextFunction) => {
+export const resendOTP = catchAsync( async (req: Request, res: Response) => {
     const { email } = req.body || {};
     await resendOTPService(email);
     logger.info(`User ${email} requested a new OTP`)
     sendSuccess(res,200, null, "OTP sent to your email")
 })
 
-export const resetPassword = catchAsync( async (req: Request, res: Response, next: NextFunction) => {
+export const resetPassword = catchAsync( async (req: Request, res: Response) => {
     const { email, code, newPassword } = req.body || {};
     await resetPasswordService(email, code, newPassword);
     logger.info(`User ${email} reset their password`)
     sendSuccess(res,200, null, "Password reset successfully")
 })
 
-export const forgotPassword = catchAsync( async (req: Request, res: Response, next: NextFunction) => {
+export const forgotPassword = catchAsync( async (req: Request, res: Response) => {
     const { email } = req.body || {};
     await forgotPasswordService(email);
     logger.info(`User ${email} requested a password reset OTP`)
     sendSuccess(res,200, null, "OTP sent to your email")
+})
+
+export const changePassword = catchAsync( async (req: Request, res: Response) => {
+    const { oldPassword, newPassword } = req.body || {};
+    const userId = req.user!.id;
+    await changePasswordService(userId, oldPassword, newPassword);
+    logger.info(`User ${req.user!.email} changed their password`)
+    sendSuccess(res,200, null, "Password changed successfully")
 })

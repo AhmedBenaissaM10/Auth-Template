@@ -95,20 +95,20 @@ export const verifyEmailService = async (email: string, code: string) => {
 
 export const resendOTPService = async ( email: string) => {
     const user = await prisma.user.findUnique({where: {email}});
-    if (!user) throw badRequest("Invalid credentials");
+    if (!user) return; // Do not throw error to prevent email enumeration
     if (user.isVerified) throw badRequest("Email already verified");
     await sendOTP(user.id, email);
 }
 
 export const resetPasswordService = async (email: string,  code: string, newPassword: string) => {
     const user = await prisma.user.findUnique({where: {email}});
-    if (!user) throw badRequest("Invalid credentials");
-    const storedCode = await redisClient.get(`otp:${user.id}`);
-    if (!storedCode) throw badRequest("OTP expired");
-    if (storedCode !== code) throw badRequest("Invalid OTP");
+    if (!user) return; // Do not throw error to prevent email enumeration
+    const storedCode = await redisClient.get(`reset:${user.id}`);
+    if (!storedCode) throw badRequest("Reset code expired");
+    if (storedCode !== code) throw badRequest("Invalid reset code");
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({where: {id: user.id}, data: {password: hashedPassword}});
-    await redisClient.del(`otp:${user.id}`);
+    await redisClient.del(`reset:${user.id}`);
 }
 
 export const changePasswordService = async (userId: string, currentPassword: string, newPassword: string) => {
@@ -122,6 +122,11 @@ export const changePasswordService = async (userId: string, currentPassword: str
 
 export const forgotPasswordService = async (email: string) => {
     const user = await prisma.user.findUnique({where: {email}});
-    if (!user) throw badRequest("Invalid credentials");
-    await sendOTP(user.id, email);
+    if (!user) return; // Do not throw error to prevent email enumeration
+
+    const codeOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await redisClient.set(`reset:${user.id}`, codeOtp, {EX: 10 * 60 });
+    
+    await sendOTPEmail(email, codeOtp, "Reset your password");
 }
