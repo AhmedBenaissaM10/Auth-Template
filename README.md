@@ -63,31 +63,38 @@ GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
 src/
 ├── config/
 │   └── env.ts               # Zod env validation
+├── errors/
+│   ├── AppError.ts          # Base error class
+│   └── ErrorIndex.ts        # Error factory helpers (badRequest, unauthorized…)
+├── features/
+│   ├── auth/
+│   │   ├── authControllers.ts
+│   │   ├── authRoute.ts
+│   │   ├── authServices.ts
+│   │   └── authValidators.ts  # Zod schemas
+│   └── admin/
+│       ├── adminControllers.ts
+│       ├── adminRoute.ts
+│       ├── adminServices.ts
+│       └── adminValidators.ts
+├── generated/
+│   └── prisma/              # Prisma generated client output
 ├── lib/
 │   ├── prisma.ts            # Prisma client
 │   ├── redis.ts             # Redis client
-│   ├── jwt.ts               # JWT sign/verify utilities
 │   └── mailer.ts            # Resend email client
 ├── middlewares/
-│   ├── requireAuth.ts       # Verifies access token
-│   ├── authorize.ts         # Role-based access control
+│   ├── auth.ts              # requireAuth middleware
+│   ├── errorHandler.ts      # Global error handler
 │   ├── rateLimiter.ts       # Global + auth rate limiters
-│   └── errorHandler.ts      # Global error handler
-├── modules/
-│   ├── auth/
-│   │   ├── auth.routes.ts
-│   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
-│   │   └── auth.schema.ts   # Zod schemas
-│   └── admin/
-│       ├── admin.routes.ts
-│       ├── admin.controller.ts
-│       └── admin.service.ts
-├── types/
-│   └── express.d.ts         # req.user augmentation
+│   └── validate.ts          # Zod request validation middleware
 ├── utils/
+│   ├── catchAsync.ts        # Async error wrapper
+│   ├── cookie.ts            # Cookie helpers
+│   ├── jwtUtils.ts          # JWT sign/verify utilities
 │   └── logger.ts
-└── app.ts
+├── app.ts
+└── index.ts
 ```
 
 ---

@@ -1,4 +1,4 @@
-import { ZodTypeAny, ZodError, z } from 'zod';
+import { ZodTypeAny, ZodError, z, success } from 'zod';
 import type { Request, Response, NextFunction } from 'express';
 import AppError from '../errors/AppError';
 
@@ -10,6 +10,7 @@ export const validate = (schema: ZodTypeAny, target : "Body" | "Query" ="Body" )
     }
     const errors = result.error.issues.map(issue => ({ path: issue.path[0], message: issue.message }));
     res.status(400).json({
+        success: false,
         status: 'fail',
         errors
     });

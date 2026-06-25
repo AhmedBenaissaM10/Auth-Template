@@ -23,7 +23,7 @@ export const CreateUser = async(email: string, name: string, password: string) =
     const existingUser = await prisma.user.findUnique({where: { email: email}})
     if (existingUser) throw badRequest("Email already in use");
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user =  await prisma.user.create({data:{email, name, password: hashedPassword}, select: {id:true, name:true, email:true,  role:true, createdAt:true}})
+    const user =  await prisma.user.create({data:{email, name, password: hashedPassword}, select: {id:true, name:true, email:true,  role:true, createdAt:true, isVerified:true}})
     try {
         await sendOTP(user.id, email);
     } catch (error) {
@@ -68,11 +68,12 @@ export const refreshService = async (refreshToken: string) => {
     const refreshDecoded = verifyRefreshToken(refreshToken);
 
     const storedToken = await redisClient.get(`refresh:${refreshDecoded.id}`);
-    if(!storedToken || storedToken !== refreshToken) throw unauthorized("Refresh token not found")
+    if(!storedToken) throw unauthorized("Refresh token not found")
+    if(storedToken !== refreshToken) throw unauthorized("Refresh token does not match")
     const accessToken = createAccessToken(refreshDecoded.id, refreshDecoded.email, refreshDecoded.role);
     const newRefreshToken = createRefreshToken(refreshDecoded.id, refreshDecoded.email, refreshDecoded.role);
     await redisClient.set(`refresh:${refreshDecoded.id}`, newRefreshToken, {EX: 7 * 24 * 60 * 60});
-    return { email: refreshDecoded.email, accessToken };
+    return { email: refreshDecoded.email, newRefreshToken, accessToken };
 }
 
 export const verifyEmailService = async (email: string, code: string) => {
@@ -96,5 +97,31 @@ export const resendOTPService = async ( email: string) => {
     const user = await prisma.user.findUnique({where: {email}});
     if (!user) throw badRequest("Invalid credentials");
     if (user.isVerified) throw badRequest("Email already verified");
+    await sendOTP(user.id, email);
+}
+
+export const resetPasswordService = async (email: string,  code: string, newPassword: string) => {
+    const user = await prisma.user.findUnique({where: {email}});
+    if (!user) throw badRequest("Invalid credentials");
+    const storedCode = await redisClient.get(`otp:${user.id}`);
+    if (!storedCode) throw badRequest("OTP expired");
+    if (storedCode !== code) throw badRequest("Invalid OTP");
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({where: {id: user.id}, data: {password: hashedPassword}});
+    await redisClient.del(`otp:${user.id}`);
+}
+
+export const changePasswordService = async (userId: string, currentPassword: string, newPassword: string) => {
+    const user = await prisma.user.findUnique({where: {id: userId}});
+    if (!user) throw badRequest("Invalid credentials");
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) throw badRequest("Current password is incorrect, please try again");
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({where: {id: user.id}, data: {password: hashedPassword}});
+}
+
+export const forgotPasswordService = async (email: string) => {
+    const user = await prisma.user.findUnique({where: {email}});
+    if (!user) throw badRequest("Invalid credentials");
     await sendOTP(user.id, email);
 }
