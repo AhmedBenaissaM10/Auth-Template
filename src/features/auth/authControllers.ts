@@ -20,11 +20,11 @@ export const signup = catchAsync(async (req: Request, res: Response, next: NextF
 
 // POST /login
 export const login = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password, rememberMe } = req.body || {};
+    const { email, password } = req.body || {};
 
     const { user, accessToken, refreshToken } = await loginUser(email, password)
 
-    setAuthCookies(res, accessToken, refreshToken, rememberMe);
+    setAuthCookies(res, accessToken, refreshToken);
     logger.info(`User ${user.email} logged in`, { userId: user.id });
     sendSuccess(res,200, {id : user.id, email: user.email, name: user.name},'Logged in successfully')
 }
